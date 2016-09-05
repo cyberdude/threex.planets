@@ -9,7 +9,6 @@ THREEx.Planets.baseURL	= '../';
 (function(){
   'use strict';
 
-
   var scripts = document.getElementsByTagName('script');
   var thisScript = scripts[scripts.length-1];
   var path = thisScript.src.replace(/\/script\.js$/, '/');
@@ -17,8 +16,6 @@ THREEx.Planets.baseURL	= '../';
   THREEx.Planets.texturesURL = path + '/../images/';
 
 })();
-
- 
 
 
 THREEx.Planets.mapTextures = function(obj){
