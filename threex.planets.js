@@ -4,8 +4,6 @@ THREEx.Planets	= {}
 
 THREEx.Planets.baseURL	= '../';
 
-
-
 (function(){
   'use strict';
 
@@ -18,9 +16,9 @@ THREEx.Planets.baseURL	= '../';
 })();
 
 
-THREEx.Planets.mapTextures = function(obj){
+THREEx.Planets.mapTextures = function(obj, keys){
 
-  var keys      = ['map', 'bumpMap'],
+  var keys      = keys || ['map', 'bumpMap'],
       promises  = [];
 
   keys.forEach(function(val){
@@ -91,9 +89,9 @@ THREEx.Planets.createPlanet = function(name, _opts){
   ).then(function(values){
 
     var material	= new THREE.MeshPhongMaterial({
-      map	: values[0],
-      bumpMap	: values[1],
-      bumpScale: planet.bumpScale,
+      map	        : values[0],
+      bumpMap	    : values[1],
+      bumpScale   : planet.bumpScale,
     })
 
     var mesh	= new THREE.Mesh(geometry, material);
@@ -416,15 +414,25 @@ THREEx.Planets.createPluto	= function(){
 	return mesh	
 }
 
-THREEx.Planets.createStarfield	= function(){
-	var texture	= THREE.ImageUtils.loadTexture(THREEx.Planets.baseURL+'images/galaxy_starfield.png')
-	var material	= new THREE.MeshBasicMaterial({
-		map	: texture,
-		side	: THREE.BackSide
-	})
-	var geometry	= new THREE.SphereGeometry(100, 32, 32)
-	var mesh	= new THREE.Mesh(geometry, material)
-	return mesh	
+THREEx.Planets.createStarfield	= function(size){
+
+  return Promise.all(
+    THREEx.Planets.mapTextures({
+      map	: 'galaxy_starfield.png'
+    }, ['map'])
+  ).then(function(values){
+
+    	var material	= new THREE.MeshBasicMaterial({
+        map	  : values[0],
+        side	: THREE.BackSide
+      }),
+      
+      geometry	= new THREE.SphereGeometry(size, 32, 32),
+      mesh	    = new THREE.Mesh(geometry, material);
+
+      return mesh;
+  });
+
 }
 
 
