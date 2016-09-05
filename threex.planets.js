@@ -2,9 +2,109 @@ var THREEx = THREEx || {}
 
 THREEx.Planets	= {}
 
-THREEx.Planets.baseURL	= '../'
+THREEx.Planets.baseURL	= '../';
+
+
+
+(function(){
+  'use strict';
+
+
+  var scripts = document.getElementsByTagName('script');
+  var thisScript = scripts[scripts.length-1];
+  var path = thisScript.src.replace(/\/script\.js$/, '/');
+
+  THREEx.Planets.texturesURL = path + '/../images/';
+
+})();
+
+ 
+
+
+THREEx.Planets.mapTextures = function(obj){
+
+  var keys      = ['map', 'bumpMap'],
+      promises  = [];
+
+  keys.forEach(function(val){
+
+    promises.push(
+
+      new Promise(function(resolve, reject){
+        new THREE.TextureLoader().load(
+          THREEx.Planets.texturesURL + obj[val],
+
+          function ( texture ) {
+            resolve( texture );
+          },
+          // Function called when download progresses
+          function ( xhr ) {
+
+            console.log(  obj[val] + ' -> ', (xhr.loaded / xhr.total * 100) + '% loaded' );
+          },
+          // Function called when download errors
+          function ( xhr ) {
+            
+            console.error(xhr);
+            reject('An error happened');
+
+          }
+        );
+      })
+
+    );
+
+  });
+
+  return promises;
+};
 
 // from http://planetpixelemporium.com/
+
+THREEx.Planets.createPlanet = function(name, _opts){
+
+  if (!_opts)
+    _ops = {};
+
+  var opts = {
+    size : 0.5
+  };
+
+  for (var key in _opts)
+    opts[key] = _opts[key];
+
+	var planets = { 
+    mars : {
+      name 	      : 'mars',
+      texture     : 'marsmap1k.jpg',
+      bumpMap     : 'marsbump1k.jpg',
+      bumpScale   : 0.05
+    }
+  };
+
+  var planet = planets[name] || planets['mars'];
+
+  var geometry	= new THREE.SphereGeometry(opts.size, 32, 32);
+
+  return Promise.all(
+    THREEx.Planets.mapTextures({
+      map	: planet.texture,
+      bumpMap	: planet.bumpMap
+    })
+  ).then(function(values){
+
+    var material	= new THREE.MeshPhongMaterial({
+      map	: values[0],
+      bumpMap	: values[1],
+      bumpScale: planet.bumpScale,
+    })
+
+    var mesh	= new THREE.Mesh(geometry, material);
+    return mesh;	
+
+  });
+
+};
 
 THREEx.Planets.createSun	= function(){
 	var geometry	= new THREE.SphereGeometry(0.5, 32, 32)
